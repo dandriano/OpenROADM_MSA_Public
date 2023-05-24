@@ -1,0 +1,12 @@
+#!/bin/bash
+
+NUM_PROCS=0
+UNAME="$(uname -s)"
+
+case "${UNAME}" in
+    Linux*)     NUM_PROCS=$(grep -c ^processor /proc/cpuinfo);;
+    Darwin*)    NUM_PROCS=$(sysctl -n hw.ncpu);;
+esac
+
+printf "Using ${NUM_PROCS} processes.\n"
+find . -name "*.yang" | xargs -P $NUM_PROCS -n 1 -I {} bash -c 'cd $(dirname {}) && pyang -f jnc --jnc-output ./src/$(dirname {}) $(basename {})'
